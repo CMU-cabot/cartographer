@@ -253,6 +253,7 @@ class PoseGraph2D : public PoseGraph {
 
   // Number of nodes added since last loop closure.
   int num_nodes_since_last_loop_closure_ GUARDED_BY(mutex_) = 0;
+  int total_num_nodes_ GUARDED_BY(mutex_) = 0;
 
   // Current optimization problem.
   std::unique_ptr<optimization::OptimizationProblem2D> optimization_problem_;
