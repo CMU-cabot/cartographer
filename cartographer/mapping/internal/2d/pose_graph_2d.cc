@@ -394,10 +394,17 @@ WorkItem::Result PoseGraph2D::ComputeConstraintsForNode(
   constraint_builder_.NotifyEndOfNode();
   absl::MutexLock locker(&mutex_);
   ++num_nodes_since_last_loop_closure_;
+
   if (options_.optimize_every_n_nodes() > 0 &&
       num_nodes_since_last_loop_closure_ > options_.optimize_every_n_nodes()) {
     return WorkItem::Result::kRunOptimization;
+  }else if(options_.optimize_every_n_nodes() > 0 &&
+     total_num_nodes_==0){
+       ++total_num_nodes_;
+     return WorkItem::Result::kRunOptimization;
   }
+  ++total_num_nodes_;
+
   return WorkItem::Result::kDoNotRunOptimization;
 }
 
