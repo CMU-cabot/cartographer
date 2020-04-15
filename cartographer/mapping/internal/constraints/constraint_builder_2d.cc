@@ -342,6 +342,10 @@ void ConstraintBuilder2D::RegisterMetrics(metrics::FamilyFactory* factory) {
   kNumSubmapScanMatchersMetric = num_matchers->Add({});
 }
 
+void ConstraintBuilder2D::ResetSampler(){
+  sampler_.Reset();
+}
+
 }  // namespace constraints
 }  // namespace mapping
 }  // namespace cartographer

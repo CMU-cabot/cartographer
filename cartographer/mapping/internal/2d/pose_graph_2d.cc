@@ -1050,8 +1050,8 @@ void PoseGraph2D::SetInitialTrajectoryPose(const int from_trajectory_id,
                                            const transform::Rigid3d& pose,
                                            const common::Time time) {
   absl::MutexLock locker(&mutex_);
-  // reset num_nodes_since_initial_trajectory_pose_
-  num_nodes_since_initial_trajectory_pose_ = 0;
+
+  ResetForNewTrajectory();
 
   data_.initial_trajectory_poses[from_trajectory_id] =
       InitialTrajectoryPose{to_trajectory_id, pose, time};
@@ -1345,6 +1345,14 @@ void PoseGraph2D::RegisterMetrics(metrics::FamilyFactory* family_factory) {
   kActiveSubmapsMetric = submaps->Add({{"state", "active"}});
   kFrozenSubmapsMetric = submaps->Add({{"state", "frozen"}});
   kDeletedSubmapsMetric = submaps->Add({{"state", "deleted"}});
+}
+
+void PoseGraph2D::ResetForNewTrajectory(){
+  // reset constraint sampler for computing constraints when the first node is added to the new trajectory
+  constraint_builder_.ResetSampler();
+
+  // reset num_nodes_since_initial_trajectory_pose_ for running optimization when the first node was added to the trajectory
+  num_nodes_since_initial_trajectory_pose_ = 0;
 }
 
 }  // namespace mapping
