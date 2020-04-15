@@ -40,6 +40,9 @@ class FixedRatioSampler {
   // Returns a debug string describing the current ratio of samples to pulses.
   std::string DebugString();
 
+  // Reset
+  void Reset();
+
  private:
   // Sampling occurs if the proportion of samples to pulses drops below this
   // number.

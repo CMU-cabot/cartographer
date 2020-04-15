@@ -106,6 +106,9 @@ class ConstraintBuilder2D {
 
   static void RegisterMetrics(metrics::FamilyFactory* family_factory);
 
+  // Reset sampler
+  void ResetSampler();
+
  private:
   struct SubmapScanMatcher {
     const Grid2D* grid = nullptr;
