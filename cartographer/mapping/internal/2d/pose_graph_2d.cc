@@ -399,11 +399,11 @@ WorkItem::Result PoseGraph2D::ComputeConstraintsForNode(
       num_nodes_since_last_loop_closure_ > options_.optimize_every_n_nodes()) {
     return WorkItem::Result::kRunOptimization;
   }else if(options_.optimize_every_n_nodes() > 0 &&
-     total_num_nodes_==0){
-       ++total_num_nodes_;
+     num_nodes_since_initial_trajectory_pose_==0){
+       ++num_nodes_since_initial_trajectory_pose_;
      return WorkItem::Result::kRunOptimization;
   }
-  ++total_num_nodes_;
+  ++num_nodes_since_initial_trajectory_pose_;
 
   return WorkItem::Result::kDoNotRunOptimization;
 }
@@ -1050,8 +1050,12 @@ void PoseGraph2D::SetInitialTrajectoryPose(const int from_trajectory_id,
                                            const transform::Rigid3d& pose,
                                            const common::Time time) {
   absl::MutexLock locker(&mutex_);
+  // reset num_nodes_since_initial_trajectory_pose_
+  num_nodes_since_initial_trajectory_pose_ = 0;
+
   data_.initial_trajectory_poses[from_trajectory_id] =
       InitialTrajectoryPose{to_trajectory_id, pose, time};
+
 }
 
 transform::Rigid3d PoseGraph2D::GetInterpolatedGlobalTrajectoryPose(
