@@ -343,7 +343,9 @@ void ConstraintBuilder2D::RegisterMetrics(metrics::FamilyFactory* factory) {
 }
 
 void ConstraintBuilder2D::ResetSampler(){
-  sampler_.Reset();
+  for (auto& id_sampler_pair: per_submap_sampler_){
+    id_sampler_pair.second.Reset();
+  }
 }
 
 }  // namespace constraints
