@@ -48,7 +48,8 @@ using TrajectoryData =
 // For fixed frame pose.
 std::unique_ptr<transform::Rigid3d> Interpolate(
     const sensor::MapByTime<sensor::FixedFramePoseData>& map_by_time,
-    const int trajectory_id, const common::Time time) {
+    const int trajectory_id, const common::Time time,
+    const double fixed_frame_pose_interpolation_timeout) {
   const auto it = map_by_time.lower_bound(trajectory_id, time);
   if (it == map_by_time.EndOfTrajectory(trajectory_id) ||
       !it->pose.has_value()) {
@@ -62,6 +63,12 @@ std::unique_ptr<transform::Rigid3d> Interpolate(
   }
   const auto prev_it = std::prev(it);
   if (prev_it->pose.has_value()) {
+    // do not interpolate pose if the difference between two poses is too large.
+    const double duration = common::ToSeconds(it->time - prev_it->time);
+    if (fixed_frame_pose_interpolation_timeout < std::fabs(duration)){
+      return nullptr;
+    }
+
     return absl::make_unique<transform::Rigid3d>(
         Interpolate(transform::TimestampedTransform{prev_it->time,
                                                     prev_it->pose.value()},
@@ -348,10 +355,32 @@ void OptimizationProblem2D::Solve(
     }
   }
 
+  // copy fixed frame origin from old trajectory to new trajectories
+  if (options_.share_fixed_frame_origin()){
+    bool fixed_frame_pose_initialized = false;
+    transform::Rigid2d fixed_frame_pose_in_map;
+    for (auto node_it = node_data_.begin(); node_it != node_data_.end();) {
+      const int trajectory_id = node_it->id.trajectory_id;
+      const auto trajectory_end = node_data_.EndOfTrajectory(trajectory_id);
+      const TrajectoryData& trajectory_data = trajectory_data_.at(trajectory_id);
+      if (!fixed_frame_pose_initialized && trajectory_data.fixed_frame_origin_in_map.has_value()) {
+        fixed_frame_pose_in_map = transform::Project2D(
+        trajectory_data.fixed_frame_origin_in_map.value());
+        fixed_frame_pose_initialized = true;
+      }else if (fixed_frame_pose_initialized){
+        trajectory_data_.at(trajectory_id).fixed_frame_origin_in_map = transform::Embed3D(fixed_frame_pose_in_map);
+      }
+      node_it = trajectory_end;
+    }
+  }
+
+  // add fixed frame constraints
   std::map<int, std::array<double, 3>> C_fixed_frames;
+
   for (auto node_it = node_data_.begin(); node_it != node_data_.end();) {
     const int trajectory_id = node_it->id.trajectory_id;
     const auto trajectory_end = node_data_.EndOfTrajectory(trajectory_id);
+
     if (!fixed_frame_pose_data_.HasTrajectory(trajectory_id)) {
       node_it = trajectory_end;
       continue;
@@ -364,7 +393,7 @@ void OptimizationProblem2D::Solve(
       const NodeSpec2D& node_data = node_it->data;
 
       const std::unique_ptr<transform::Rigid3d> fixed_frame_pose =
-          Interpolate(fixed_frame_pose_data_, trajectory_id, node_data.time);
+          Interpolate(fixed_frame_pose_data_, trajectory_id, node_data.time, options_.fixed_frame_pose_interpolation_timeout());
       if (fixed_frame_pose == nullptr) {
         continue;
       }

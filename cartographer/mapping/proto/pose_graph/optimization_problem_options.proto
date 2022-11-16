@@ -70,4 +70,8 @@ message OptimizationProblemOptions {
   bool log_solver_summary = 5;
 
   common.proto.CeresSolverOptions ceres_solver_options = 7;
+
+  // If true, fixed_frame_origin_in_map is shared from the oldest trajectory to new trajectries.
+  bool share_fixed_frame_origin = 100;
+  double fixed_frame_pose_interpolation_timeout = 101;
 }

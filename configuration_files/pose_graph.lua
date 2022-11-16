@@ -82,6 +82,8 @@ POSE_GRAPH = {
       max_num_iterations = 50,
       num_threads = 7,
     },
+    share_fixed_frame_origin = false,
+    fixed_frame_pose_interpolation_timeout = 1.5,
   },
   max_num_final_iterations = 200,
   global_sampling_ratio = 0.003,

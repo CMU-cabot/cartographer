@@ -56,6 +56,8 @@ proto::OptimizationProblemOptions CreateOptimizationProblemOptions(
   *options.mutable_ceres_solver_options() =
       common::CreateCeresSolverOptionsProto(
           parameter_dictionary->GetDictionary("ceres_solver_options").get());
+  options.set_share_fixed_frame_origin(parameter_dictionary->GetBool("share_fixed_frame_origin"));
+  options.set_fixed_frame_pose_interpolation_timeout(parameter_dictionary->GetDouble("fixed_frame_pose_interpolation_timeout"));
   return options;
 }
 
