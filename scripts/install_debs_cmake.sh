@@ -39,7 +39,7 @@ sudo apt-get install -y \
 
 # Install Ceres Solver and Protocol Buffers support if available.
 # No need to build it ourselves.
-if [[ "$(lsb_release -sc)" = "focal" || "$(lsb_release -sc)" = "buster" ]]
+if [[ "$(lsb_release -sc)" = "focal" || "$(lsb_release -sc)" = "jammy" || "$(lsb_release -sc)" = "buster" ]]
 then
   sudo apt-get install -y python3-sphinx libgmock-dev libceres-dev protobuf-compiler
 else
