@@ -58,6 +58,7 @@ void OrderedMultiQueue::MarkQueueAsFinished(const QueueKey& queue_key) {
   CHECK(!queue.finished);
   queue.finished = true;
   Dispatch();
+  last_dispatched_time_ = common::Time::min(); // Reset last_dispatched_time_ after dispatch to avoid "Non-sorted data added to queue" error after finishing and starting trajectories
 }
 
 void OrderedMultiQueue::Add(const QueueKey& queue_key,
@@ -110,7 +111,8 @@ void OrderedMultiQueue::Dispatch() {
         next_queue_key = it->first;
       }
       CHECK_LE(last_dispatched_time_, next_data->GetTime())
-          << "Non-sorted data added to queue: '" << it->first << "'";
+          << "Non-sorted data added to queue: '" << it->first << "'. "
+          << "(last_dispatched_queue_key : '" << last_dispatched_queue_key_ << "')";
       ++it;
     }
     if (next_data == nullptr) {
@@ -126,6 +128,7 @@ void OrderedMultiQueue::Dispatch() {
     if (next_data->GetTime() >= common_start_time) {
       // Happy case, we are beyond the 'common_start_time' already.
       last_dispatched_time_ = next_data->GetTime();
+      last_dispatched_queue_key_ = next_queue_key;
       next_queue->callback(next_queue->queue.Pop());
     } else if (next_queue->queue.Size() < 2) {
       if (!next_queue->finished) {
@@ -134,6 +137,7 @@ void OrderedMultiQueue::Dispatch() {
         return;
       }
       last_dispatched_time_ = next_data->GetTime();
+      last_dispatched_queue_key_ = next_queue_key;
       next_queue->callback(next_queue->queue.Pop());
     } else {
       // We take a peek at the time after next data. If it also is not beyond
@@ -142,6 +146,7 @@ void OrderedMultiQueue::Dispatch() {
       std::unique_ptr<Data> next_data_owner = next_queue->queue.Pop();
       if (next_queue->queue.Peek<Data>()->GetTime() > common_start_time) {
         last_dispatched_time_ = next_data->GetTime();
+        last_dispatched_queue_key_ = next_queue_key;
         next_queue->callback(std::move(next_data_owner));
       }
     }

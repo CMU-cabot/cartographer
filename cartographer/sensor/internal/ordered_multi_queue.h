@@ -89,6 +89,7 @@ class OrderedMultiQueue {
 
   // Used to verify that values are dispatched in sorted order.
   common::Time last_dispatched_time_ = common::Time::min();
+  QueueKey last_dispatched_queue_key_;
 
   std::map<int, common::Time> common_start_time_per_trajectory_;
   std::map<QueueKey, Queue> queues_;
