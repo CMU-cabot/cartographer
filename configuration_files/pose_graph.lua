@@ -84,6 +84,9 @@ POSE_GRAPH = {
     },
     share_fixed_frame_origin = false,
     fixed_frame_pose_interpolation_timeout = 1.5,
+    set_constant_fixed_frame_origin = false;
+    set_constant_first_submap_translation = true;
+    set_constant_first_submap_rotation = true;
   },
   max_num_final_iterations = 200,
   global_sampling_ratio = 0.003,

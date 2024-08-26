@@ -275,12 +275,27 @@ void OptimizationProblem2D::Solve(
         frozen_trajectories.count(submap_id_data.id.trajectory_id) != 0;
     C_submaps.Insert(submap_id_data.id,
                      FromPose(submap_id_data.data.global_pose));
-    problem.AddParameterBlock(C_submaps.at(submap_id_data.id).data(), 3);
-    if (first_submap || frozen) {
+    double* parameter_block = C_submaps.at(submap_id_data.id).data();
+    problem.AddParameterBlock(parameter_block, 3);
+    if (frozen) {
       first_submap = false;
-      // Fix the pose of the first submap or all submaps of a frozen
-      // trajectory.
-      problem.SetParameterBlockConstant(C_submaps.at(submap_id_data.id).data());
+      // Fix the pose of the all submaps of a frozen trajectory.
+      problem.SetParameterBlockConstant(parameter_block);
+    }else if (first_submap) {
+      first_submap = false;
+      // Fix the pose of the first submap
+      if (options_.set_constant_first_submap_translation() &&  options_.set_constant_first_submap_rotation()){
+        // fix x, y and angle
+        problem.SetParameterBlockConstant(parameter_block);
+      } else if (options_.set_constant_first_submap_translation() && !options_.set_constant_first_submap_rotation()){
+        // fix x and y
+        ceres::SubsetParameterization* subset_parameterization = new ceres::SubsetParameterization(3, {0, 1});
+        problem.SetParameterization(parameter_block, subset_parameterization);
+      } else if (!options_.set_constant_first_submap_translation() && options_.set_constant_first_submap_rotation()){
+        // fix angle
+        ceres::SubsetParameterization* subset_parameterization = new ceres::SubsetParameterization(3, {2});
+        problem.SetParameterization(parameter_block, subset_parameterization);
+      }
     }
   }
   for (const auto& node_id_data : node_data_) {
@@ -416,6 +431,13 @@ void OptimizationProblem2D::Solve(
         C_fixed_frames.emplace(trajectory_id,
                                FromPose(fixed_frame_pose_in_map));
         fixed_frame_pose_initialized = true;
+
+        if (options_.set_constant_fixed_frame_origin()){
+          // set fixed frame origin as a constant parameter block
+          double * parameter_block = C_fixed_frames.at(trajectory_id).data();
+          problem.AddParameterBlock(parameter_block, 3);
+          problem.SetParameterBlockConstant(parameter_block);
+        }
       }
 
       problem.AddResidualBlock(

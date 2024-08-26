@@ -74,4 +74,10 @@ message OptimizationProblemOptions {
   // If true, fixed_frame_origin_in_map is shared from the oldest trajectory to new trajectries.
   bool share_fixed_frame_origin = 100;
   double fixed_frame_pose_interpolation_timeout = 101;
+
+  // If true, set fixed_frame_pose_in_map as a constant parameter block
+  bool set_constant_fixed_frame_origin = 102;
+
+  bool set_constant_first_submap_translation = 103;
+  bool set_constant_first_submap_rotation = 104;
 }
