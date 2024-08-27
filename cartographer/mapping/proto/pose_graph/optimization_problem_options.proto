@@ -77,7 +77,11 @@ message OptimizationProblemOptions {
 
   // If true, set fixed_frame_pose_in_map as a constant parameter block
   bool set_constant_fixed_frame_origin = 102;
+  // If true, initialize fixed_frame_pose_in_map with zero (0,0,0) to align its initial guess with the origin of the global pose coordinate
+  bool zero_initialize_fixed_frame_origin = 103;
 
-  bool set_constant_first_submap_translation = 103;
-  bool set_constant_first_submap_rotation = 104;
+  // If true, set translation and/or rotation of the first submap origin as constant parameters
+  // This options can be used to release hard constraints between the first submap and the global pose coordinate
+  bool set_constant_first_submap_translation = 104;
+  bool set_constant_first_submap_rotation = 105;
 }

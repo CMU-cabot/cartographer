@@ -59,6 +59,7 @@ proto::OptimizationProblemOptions CreateOptimizationProblemOptions(
   options.set_share_fixed_frame_origin(parameter_dictionary->GetBool("share_fixed_frame_origin"));
   options.set_fixed_frame_pose_interpolation_timeout(parameter_dictionary->GetDouble("fixed_frame_pose_interpolation_timeout"));
   options.set_set_constant_fixed_frame_origin(parameter_dictionary->GetBool("set_constant_fixed_frame_origin"));
+  options.set_zero_initialize_fixed_frame_origin(parameter_dictionary->GetBool("zero_initialize_fixed_frame_origin"));
   options.set_set_constant_first_submap_translation(parameter_dictionary->GetBool("set_constant_first_submap_translation"));
   options.set_set_constant_first_submap_rotation(parameter_dictionary->GetBool("set_constant_first_submap_rotation"));
   return options;

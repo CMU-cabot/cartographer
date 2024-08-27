@@ -423,9 +423,15 @@ void OptimizationProblem2D::Solve(
           fixed_frame_pose_in_map = transform::Project2D(
               trajectory_data.fixed_frame_origin_in_map.value());
         } else {
-          fixed_frame_pose_in_map =
-              node_data.global_pose_2d *
-              transform::Project2D(constraint_pose.zbar_ij).inverse();
+          if (options_.zero_initialize_fixed_frame_origin()){
+            // initialize fixed frame origin with zero
+            std::array<double, 3> values = {{0.0, 0.0, 0.0}};
+            fixed_frame_pose_in_map = ToPose(values);
+          } else {
+            fixed_frame_pose_in_map =
+                node_data.global_pose_2d *
+                transform::Project2D(constraint_pose.zbar_ij).inverse();
+          }
         }
 
         C_fixed_frames.emplace(trajectory_id,
