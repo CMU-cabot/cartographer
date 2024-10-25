@@ -380,7 +380,7 @@ WorkItem::Result PoseGraph2D::ComputeConstraintsForNode(
     ComputeConstraint(node_id, submap_id);
   }
 
-  if (newly_finished_submap) {
+  if (newly_finished_submap && options_.compute_new_submap_constraints()) {
     const SubmapId newly_finished_submap_id = submap_ids.front();
     // We have a new completed submap, so we look into adding constraints for
     // old nodes.

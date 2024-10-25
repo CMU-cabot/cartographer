@@ -98,4 +98,5 @@ POSE_GRAPH = {
   --    min_covered_area = 2,
   --    min_added_submaps_count = 5,
   --  },
+  compute_new_submap_constraints = true,
 }
