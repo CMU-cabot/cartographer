@@ -84,4 +84,7 @@ message OptimizationProblemOptions {
   // This options can be used to release hard constraints between the first submap and the global pose coordinate
   bool set_constant_first_submap_translation = 104;
   bool set_constant_first_submap_rotation = 105;
+
+  // If true, skip adding fixed_frame_pose_data constraints for frozen trajectories.
+  bool skip_fixed_frame_pose_constraints_for_frozen_trajectories = 106;
 }

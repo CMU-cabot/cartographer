@@ -396,6 +396,14 @@ void OptimizationProblem2D::Solve(
     const int trajectory_id = node_it->id.trajectory_id;
     const auto trajectory_end = node_data_.EndOfTrajectory(trajectory_id);
 
+    // skip adding fixed frame constraints for frozen trajectories
+    if (options_.skip_fixed_frame_pose_constraints_for_frozen_trajectories()){
+      if (frozen_trajectories.count(trajectory_id) != 0) {
+        node_it = trajectory_end;
+        continue;
+      }
+    }
+
     if (!fixed_frame_pose_data_.HasTrajectory(trajectory_id)) {
       node_it = trajectory_end;
       continue;

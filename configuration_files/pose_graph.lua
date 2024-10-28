@@ -88,6 +88,7 @@ POSE_GRAPH = {
     zero_initialize_fixed_frame_origin = false;
     set_constant_first_submap_translation = true;
     set_constant_first_submap_rotation = true;
+    skip_fixed_frame_pose_constraints_for_frozen_trajectories = true,
   },
   max_num_final_iterations = 200,
   global_sampling_ratio = 0.003,

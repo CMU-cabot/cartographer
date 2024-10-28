@@ -62,6 +62,8 @@ proto::OptimizationProblemOptions CreateOptimizationProblemOptions(
   options.set_zero_initialize_fixed_frame_origin(parameter_dictionary->GetBool("zero_initialize_fixed_frame_origin"));
   options.set_set_constant_first_submap_translation(parameter_dictionary->GetBool("set_constant_first_submap_translation"));
   options.set_set_constant_first_submap_rotation(parameter_dictionary->GetBool("set_constant_first_submap_rotation"));
+  options.set_skip_fixed_frame_pose_constraints_for_frozen_trajectories(
+      parameter_dictionary->GetBool("skip_fixed_frame_pose_constraints_for_frozen_trajectories"));
   return options;
 }
 
