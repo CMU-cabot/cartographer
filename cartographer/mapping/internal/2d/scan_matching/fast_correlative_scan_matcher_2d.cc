@@ -85,6 +85,8 @@ CreateFastCorrelativeScanMatcherOptions2D(
       parameter_dictionary->GetDouble("angular_search_window"));
   options.set_branch_and_bound_depth(
       parameter_dictionary->GetInt("branch_and_bound_depth"));
+  options.set_skip_depth(
+      parameter_dictionary->GetInt("skip_depth"));
   return options;
 }
 
@@ -173,16 +175,19 @@ PrecomputationGridStack2D::PrecomputationGridStack2D(
     const proto::FastCorrelativeScanMatcherOptions2D& options) {
   CHECK_GE(options.branch_and_bound_depth(), 1);
   const int max_width = 1 << (options.branch_and_bound_depth() - 1);
-  precomputation_grids_.reserve(options.branch_and_bound_depth());
   std::vector<float> reusable_intermediate_grid;
   const CellLimits limits = grid.limits().cell_limits();
   reusable_intermediate_grid.reserve((limits.num_x_cells + max_width - 1) *
                                      limits.num_y_cells);
-  for (int i = 0; i != options.branch_and_bound_depth(); ++i) {
+  // precompute only grids to be used later
+  for (int i = options.skip_depth(); i != options.branch_and_bound_depth(); ++i) {
     const int width = 1 << i;
-    precomputation_grids_.emplace_back(grid, limits, width,
-                                       &reusable_intermediate_grid);
+    precomputation_grids_.emplace(i,
+                                  PrecomputationGrid2D(grid, limits, width,
+                                  &reusable_intermediate_grid));
   }
+  // max_depth was defined as 'precomputation_grids_.size() - 1' in the original implementation
+  max_depth_ = options.branch_and_bound_depth() - 1;
 }
 
 FastCorrelativeScanMatcher2D::FastCorrelativeScanMatcher2D(
@@ -337,7 +342,7 @@ Candidate2D FastCorrelativeScanMatcher2D::BranchAndBound(
     const SearchParameters& search_parameters,
     const std::vector<Candidate2D>& candidates, const int candidate_depth,
     float min_score) const {
-  if (candidate_depth == 0) {
+  if (candidate_depth - options_.skip_depth() == 0) {
     // Return the best candidate.
     return *candidates.begin();
   }
