@@ -175,19 +175,22 @@ PrecomputationGridStack2D::PrecomputationGridStack2D(
     const proto::FastCorrelativeScanMatcherOptions2D& options) {
   CHECK_GE(options.branch_and_bound_depth(), 1);
   const int max_width = 1 << (options.branch_and_bound_depth() - 1);
+  const int vector_size = options.branch_and_bound_depth() - options.skip_depth();
+  precomputation_grids_.reserve(vector_size);
   std::vector<float> reusable_intermediate_grid;
   const CellLimits limits = grid.limits().cell_limits();
   reusable_intermediate_grid.reserve((limits.num_x_cells + max_width - 1) *
                                      limits.num_y_cells);
   // precompute only grids to be used later
-  for (int i = options.skip_depth(); i != options.branch_and_bound_depth(); ++i) {
-    const int width = 1 << i;
-    precomputation_grids_.emplace(i,
-                                  PrecomputationGrid2D(grid, limits, width,
-                                  &reusable_intermediate_grid));
+  for (int i = 0; i != vector_size; ++i) {
+    const int local_index = i + options.skip_depth();
+    const int width = 1 << local_index;
+    precomputation_grids_.emplace_back(grid, limits, width,
+                                  &reusable_intermediate_grid);
   }
   // max_depth was defined as 'precomputation_grids_.size() - 1' in the original implementation
   max_depth_ = options.branch_and_bound_depth() - 1;
+  skip_depth_ = options.skip_depth();
 }
 
 FastCorrelativeScanMatcher2D::FastCorrelativeScanMatcher2D(

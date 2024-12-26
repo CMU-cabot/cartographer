@@ -100,13 +100,14 @@ class PrecomputationGridStack2D {
       const proto::FastCorrelativeScanMatcherOptions2D& options);
 
   const PrecomputationGrid2D& Get(int index) {
-    return precomputation_grids_.at(index);
+    return precomputation_grids_.at(index - skip_depth_);
   }
 
   int max_depth() const { return max_depth_; }
 
  private:
-  std::map<int, PrecomputationGrid2D> precomputation_grids_;
+  std::vector<PrecomputationGrid2D> precomputation_grids_;
+  int skip_depth_;
   int max_depth_;
 };
 
