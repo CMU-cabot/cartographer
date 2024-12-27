@@ -25,6 +25,7 @@
 #ifndef CARTOGRAPHER_MAPPING_INTERNAL_2D_SCAN_MATCHING_FAST_CORRELATIVE_SCAN_MATCHER_2D_H_
 #define CARTOGRAPHER_MAPPING_INTERNAL_2D_SCAN_MATCHING_FAST_CORRELATIVE_SCAN_MATCHER_2D_H_
 
+#include <map>
 #include <memory>
 #include <vector>
 
@@ -99,13 +100,16 @@ class PrecomputationGridStack2D {
       const proto::FastCorrelativeScanMatcherOptions2D& options);
 
   const PrecomputationGrid2D& Get(int index) {
-    return precomputation_grids_[index];
+    return precomputation_grids_.at(index - skip_depth_);
   }
 
-  int max_depth() const { return precomputation_grids_.size() - 1; }
+  int max_depth() const { return max_depth_; }
+  int skip_depth() const { return skip_depth_; }
 
  private:
   std::vector<PrecomputationGrid2D> precomputation_grids_;
+  int skip_depth_;
+  int max_depth_;
 };
 
 // An implementation of "Real-Time Correlative Scan Matching" by Olson.

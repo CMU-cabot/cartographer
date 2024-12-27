@@ -27,4 +27,8 @@ message FastCorrelativeScanMatcherOptions2D {
 
   // Number of precomputed grids to use.
   int32 branch_and_bound_depth = 2;
+
+  // Additional parameters to adjust branch and bound search
+  double resolution_lower_limit = 101;
+  double resolution_upper_limit = 102;
 }
