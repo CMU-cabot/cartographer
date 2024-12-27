@@ -85,8 +85,10 @@ CreateFastCorrelativeScanMatcherOptions2D(
       parameter_dictionary->GetDouble("angular_search_window"));
   options.set_branch_and_bound_depth(
       parameter_dictionary->GetInt("branch_and_bound_depth"));
-  options.set_skip_depth(
-      parameter_dictionary->GetInt("skip_depth"));
+  options.set_resolution_lower_limit(
+      parameter_dictionary->GetDouble("resolution_lower_limit"));
+  options.set_resolution_upper_limit(
+      parameter_dictionary->GetDouble("resolution_upper_limit"));
   return options;
 }
 
@@ -174,8 +176,23 @@ PrecomputationGridStack2D::PrecomputationGridStack2D(
     const Grid2D& grid,
     const proto::FastCorrelativeScanMatcherOptions2D& options) {
   CHECK_GE(options.branch_and_bound_depth(), 1);
-  const int max_width = 1 << (options.branch_and_bound_depth() - 1);
-  const int vector_size = options.branch_and_bound_depth() - options.skip_depth();
+  CHECK_GE(options.resolution_lower_limit(), 0);
+  CHECK_GE(options.resolution_upper_limit(), 0);
+  // compute skip depth
+  double grid_resolution = grid.limits().resolution();
+  int skip_depth = 0;
+  if (grid.limits().resolution() < options.resolution_lower_limit()){
+    skip_depth = static_cast<int>(std::round(std::log2(options.resolution_lower_limit() / grid.limits().resolution() )));
+  }
+  // compute allowable branch and bound depth
+  int branch_and_bound_depth = options.branch_and_bound_depth();
+  int depth_upper_limit = static_cast<int>(std::round(std::log2(options.resolution_upper_limit() / grid.limits().resolution() )));
+  if ( depth_upper_limit < branch_and_bound_depth ){
+    branch_and_bound_depth = depth_upper_limit;
+  }
+  // start memory allocation
+  const int max_width = 1 << (branch_and_bound_depth - 1);
+  const int vector_size = branch_and_bound_depth - skip_depth;
   precomputation_grids_.reserve(vector_size);
   std::vector<float> reusable_intermediate_grid;
   const CellLimits limits = grid.limits().cell_limits();
@@ -183,14 +200,14 @@ PrecomputationGridStack2D::PrecomputationGridStack2D(
                                      limits.num_y_cells);
   // precompute only grids to be used later
   for (int i = 0; i != vector_size; ++i) {
-    const int local_index = i + options.skip_depth();
+    const int local_index = i + skip_depth;
     const int width = 1 << local_index;
     precomputation_grids_.emplace_back(grid, limits, width,
                                   &reusable_intermediate_grid);
   }
   // max_depth was defined as 'precomputation_grids_.size() - 1' in the original implementation
-  max_depth_ = options.branch_and_bound_depth() - 1;
-  skip_depth_ = options.skip_depth();
+  max_depth_ = branch_and_bound_depth - 1;
+  skip_depth_ = skip_depth;
 }
 
 FastCorrelativeScanMatcher2D::FastCorrelativeScanMatcher2D(
@@ -345,7 +362,7 @@ Candidate2D FastCorrelativeScanMatcher2D::BranchAndBound(
     const SearchParameters& search_parameters,
     const std::vector<Candidate2D>& candidates, const int candidate_depth,
     float min_score) const {
-  if (candidate_depth - options_.skip_depth() == 0) {
+  if (candidate_depth - precomputation_grid_stack_->skip_depth() == 0) {
     // Return the best candidate.
     return *candidates.begin();
   }

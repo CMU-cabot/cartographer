@@ -104,6 +104,7 @@ class PrecomputationGridStack2D {
   }
 
   int max_depth() const { return max_depth_; }
+  int skip_depth() const { return skip_depth_; }
 
  private:
   std::vector<PrecomputationGrid2D> precomputation_grids_;
