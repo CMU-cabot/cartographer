@@ -113,6 +113,8 @@ proto::PoseGraphOptions CreatePoseGraphOptions(
   PopulateOverlappingSubmapsTrimmerOptions2D(&options, parameter_dictionary);
   options.set_compute_new_submap_constraints(
       parameter_dictionary->GetBool("compute_new_submap_constraints"));
+  options.set_clear_work_queue_on_finish_trajectory(
+      parameter_dictionary->GetBool("clear_work_queue_on_finish_trajectory"));
   return options;
 }
 

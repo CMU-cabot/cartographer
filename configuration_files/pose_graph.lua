@@ -102,4 +102,5 @@ POSE_GRAPH = {
   --    min_added_submaps_count = 5,
   --  },
   compute_new_submap_constraints = true,
+  clear_work_queue_on_finish_trajectory = false,
 }

@@ -550,6 +550,18 @@ void PoseGraph2D::DrainWorkQueue() {
       });
 }
 
+size_t PoseGraph2D::ClearWorkQueue() {
+  absl::MutexLock locker(&work_queue_mutex_);
+  size_t work_queue_size = work_queue_->size();
+  work_queue_->clear();
+  return work_queue_size;
+}
+
+size_t PoseGraph2D::WorkQueueSize() {
+  absl::MutexLock locker(&work_queue_mutex_);
+  return work_queue_->size();
+}
+
 void PoseGraph2D::WaitForAllComputations() {
   int num_trajectory_nodes;
   {
@@ -640,6 +652,13 @@ void PoseGraph2D::DeleteTrajectory(const int trajectory_id) {
 }
 
 void PoseGraph2D::FinishTrajectory(const int trajectory_id) {
+  size_t work_queue_size = WorkQueueSize();
+  LOG(INFO) << "Remaining work items in queue on FinishTrajectory: " << work_queue_size;
+  if (options_.clear_work_queue_on_finish_trajectory()){
+    work_queue_size = ClearWorkQueue();
+    LOG(INFO) << "Cleared " << work_queue_size <<" work items on FinishTrajectory (trajectory_ID: " << trajectory_id << ")";
+  }
+
   AddWorkItem([this, trajectory_id]() LOCKS_EXCLUDED(mutex_) {
     absl::MutexLock locker(&mutex_);
     CHECK(!IsTrajectoryFinished(trajectory_id));

@@ -209,6 +209,15 @@ class PoseGraph2D : public PoseGraph {
   void DrainWorkQueue() LOCKS_EXCLUDED(mutex_)
       LOCKS_EXCLUDED(work_queue_mutex_);
 
+  // Clear tasks in the work queue
+  // returns the size of cleared work items
+  size_t ClearWorkQueue() LOCKS_EXCLUDED(mutex_)
+      LOCKS_EXCLUDED(work_queue_mutex_);
+
+  // Size of the work queue
+  size_t WorkQueueSize() LOCKS_EXCLUDED(mutex_)
+      LOCKS_EXCLUDED(work_queue_mutex_);
+
   // Waits until we caught up (i.e. nothing is waiting to be scheduled), and
   // all computations have finished.
   void WaitForAllComputations() LOCKS_EXCLUDED(mutex_)

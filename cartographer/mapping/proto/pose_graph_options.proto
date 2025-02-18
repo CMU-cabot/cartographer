@@ -68,4 +68,7 @@ message PoseGraphOptions {
 
   // Whether to compute constraints from old nodes to a newly finished submap
   bool compute_new_submap_constraints = 100;
+
+  // Whether to clear work queue on finish trajectory call
+  bool clear_work_queue_on_finish_trajectory = 101;
 }
