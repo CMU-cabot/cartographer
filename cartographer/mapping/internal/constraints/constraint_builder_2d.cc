@@ -82,6 +82,13 @@ void ConstraintBuilder2D::MaybeAddConstraint(
       options_.max_constraint_distance()) {
     return;
   }
+
+  // skip small point cloud
+  if (constant_data->filtered_gravity_aligned_point_cloud.size() <
+      options_.min_scan_points()){
+    return;
+  }
+
   if (!per_submap_sampler_
            .emplace(std::piecewise_construct, std::forward_as_tuple(submap_id),
                     std::forward_as_tuple(options_.sampling_ratio()))

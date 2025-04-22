@@ -55,6 +55,8 @@ proto::ConstraintBuilderOptions CreateConstraintBuilderOptions(
   *options.mutable_ceres_scan_matcher_options_3d() =
       scan_matching::CreateCeresScanMatcherOptions3D(
           parameter_dictionary->GetDictionary("ceres_scan_matcher_3d").get());
+  options.set_min_scan_points(
+      parameter_dictionary->GetInt("min_scan_points"));
   return options;
 }
 

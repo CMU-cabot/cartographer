@@ -56,4 +56,7 @@ message ConstraintBuilderOptions {
       fast_correlative_scan_matcher_options_3d = 10;
   mapping.scan_matching.proto.CeresScanMatcherOptions3D
       ceres_scan_matcher_options_3d = 12;
+
+  // Threshold for the number of points considered for constraint search
+  int32 min_scan_points = 100;
 }
