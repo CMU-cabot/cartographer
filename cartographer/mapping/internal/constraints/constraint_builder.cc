@@ -57,6 +57,10 @@ proto::ConstraintBuilderOptions CreateConstraintBuilderOptions(
           parameter_dictionary->GetDictionary("ceres_scan_matcher_3d").get());
   options.set_min_scan_points(
       parameter_dictionary->GetInt("min_scan_points"));
+  options.set_min_average_scan_range(
+      parameter_dictionary->GetInt("min_average_scan_range"));
+  options.set_min_median_scan_range(
+      parameter_dictionary->GetInt("min_median_scan_range"));
   return options;
 }
 

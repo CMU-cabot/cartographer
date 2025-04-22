@@ -59,4 +59,6 @@ message ConstraintBuilderOptions {
 
   // Threshold for the number of points considered for constraint search
   int32 min_scan_points = 100;
+  double min_average_scan_range = 101;
+  double min_median_scan_range = 102;
 }

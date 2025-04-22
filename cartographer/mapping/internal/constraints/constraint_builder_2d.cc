@@ -85,7 +85,7 @@ void ConstraintBuilder2D::MaybeAddConstraint(
 
   // skip small point cloud
   if (constant_data->filtered_gravity_aligned_point_cloud.size() <
-      options_.min_scan_points()){
+      options_.min_scan_points()) {
     return;
   }
 

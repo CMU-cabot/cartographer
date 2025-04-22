@@ -25,6 +25,7 @@
 #include <iterator>
 #include <limits>
 #include <memory>
+#include <numeric>
 #include <sstream>
 #include <string>
 
@@ -316,6 +317,10 @@ WorkItem::Result PoseGraph2D::ComputeConstraintsForNode(
   std::vector<SubmapId> submap_ids;
   std::vector<SubmapId> finished_submap_ids;
   std::set<NodeId> newly_finished_submap_node_ids;
+
+  size_t num_scan_points;
+  float average_scan_range;
+  float median_scan_range;
   {
     absl::MutexLock locker(&mutex_);
     const auto& constant_data =
@@ -374,10 +379,34 @@ WorkItem::Result PoseGraph2D::ComputeConstraintsForNode(
       finished_submap_data.state = SubmapState::kFinished;
       newly_finished_submap_node_ids = finished_submap_data.node_ids;
     }
+
+    // calculate statistics to skip compute constraint
+    const sensor::PointCloud & point_cloud = constant_data->filtered_gravity_aligned_point_cloud;
+    num_scan_points = point_cloud.size();
+    std::vector<float> ranges;
+    for (const auto& point : point_cloud) {
+      float range2D = point.position.head<2>().norm();
+      ranges.push_back(range2D);
+    }
+    average_scan_range = std::accumulate(ranges.begin(), ranges.end(), 0.0f)/ranges.size();
+    std::sort(ranges.begin(), ranges.end());
+    median_scan_range = ranges.at(ranges.size()/2);
   }
 
-  for (const auto& submap_id : finished_submap_ids) {
-    ComputeConstraint(node_id, submap_id);
+  // Skip ComputeConstraint for submaps when the point cloud does not meet the thresholds.
+  if (options_.constraint_builder_options().min_scan_points() <= num_scan_points &&
+      options_.constraint_builder_options().min_average_scan_range() <= average_scan_range &&
+      options_.constraint_builder_options().min_median_scan_range() <= median_scan_range) {
+    LOG(INFO) << "ComputeConstraintsForNode: ComputeConstraint for Node (num_scan_points = " << num_scan_points
+            << ", average_scan_range = " << average_scan_range
+            << ", median_scan_range = " << median_scan_range << ")";
+    for (const auto& submap_id : finished_submap_ids) {
+      ComputeConstraint(node_id, submap_id);
+    }
+  } else {
+    LOG(INFO) << "ComputeConstraintsForNode: skipped ComputeConstraint for Node (num_scan_points = " << num_scan_points
+              << ", average_scan_range = " << average_scan_range
+              << ", median_scan_range = " << median_scan_range << ")";
   }
 
   if (newly_finished_submap && options_.compute_new_submap_constraints()) {
