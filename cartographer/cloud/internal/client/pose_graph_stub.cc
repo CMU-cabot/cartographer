@@ -86,6 +86,11 @@ transform::Rigid3d PoseGraphStub::GetLocalToGlobalTransform(
   return transform::ToRigid3(client.response().local_to_global());
 }
 
+absl::optional<transform::Rigid3d> PoseGraphStub::TryGetLocalToGlobalTransform(
+    int trajectory_id) const {
+  return GetLocalToGlobalTransform(trajectory_id);
+}
+
 mapping::MapById<mapping::NodeId, mapping::TrajectoryNode>
 PoseGraphStub::GetTrajectoryNodes() const {
   LOG(FATAL) << "Not implemented";

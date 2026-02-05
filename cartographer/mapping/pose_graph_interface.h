@@ -112,6 +112,10 @@ class PoseGraphInterface {
   // discontinuous, loop-closed frame).
   virtual transform::Rigid3d GetLocalToGlobalTransform(
       int trajectory_id) const = 0;
+  // Tries to return the local-to-global transform without blocking.
+  // Returns nullopt on failure.
+  virtual absl::optional<transform::Rigid3d> TryGetLocalToGlobalTransform(
+      int trajectory_id) const = 0;
 
   // Returns the current optimized trajectories.
   virtual MapById<NodeId, TrajectoryNode> GetTrajectoryNodes() const = 0;

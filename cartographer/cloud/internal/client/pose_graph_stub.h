@@ -39,6 +39,8 @@ class PoseGraphStub : public ::cartographer::mapping::PoseGraphInterface {
       const override;
   transform::Rigid3d GetLocalToGlobalTransform(
       int trajectory_id) const override;
+  absl::optional<transform::Rigid3d> TryGetLocalToGlobalTransform(
+      int trajectory_id) const override;
   mapping::MapById<mapping::NodeId, mapping::TrajectoryNode>
   GetTrajectoryNodes() const override;
   mapping::MapById<mapping::NodeId, mapping::TrajectoryNodePose>

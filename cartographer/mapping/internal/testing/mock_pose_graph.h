@@ -38,6 +38,8 @@ class MockPoseGraph : public mapping::PoseGraphInterface {
   MOCK_CONST_METHOD0(GetAllSubmapPoses,
                      mapping::MapById<mapping::SubmapId, SubmapPose>());
   MOCK_CONST_METHOD1(GetLocalToGlobalTransform, transform::Rigid3d(int));
+  MOCK_CONST_METHOD1(TryGetLocalToGlobalTransform,
+                     absl::optional<transform::Rigid3d>(int));
   MOCK_CONST_METHOD0(
       GetTrajectoryNodes,
       mapping::MapById<mapping::NodeId, mapping::TrajectoryNode>());

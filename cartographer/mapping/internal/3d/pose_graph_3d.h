@@ -29,6 +29,7 @@
 #include "Eigen/Geometry"
 #include "absl/container/flat_hash_map.h"
 #include "absl/synchronization/mutex.h"
+#include "absl/types/optional.h"
 #include "cartographer/common/fixed_ratio_sampler.h"
 #include "cartographer/common/thread_pool.h"
 #include "cartographer/common/time.h"
@@ -122,6 +123,8 @@ class PoseGraph3D : public PoseGraph {
       LOCKS_EXCLUDED(mutex_) override;
   transform::Rigid3d GetLocalToGlobalTransform(int trajectory_id) const
       LOCKS_EXCLUDED(mutex_) override;
+  absl::optional<transform::Rigid3d> TryGetLocalToGlobalTransform(
+      int trajectory_id) const override;
   MapById<NodeId, TrajectoryNode> GetTrajectoryNodes() const override
       LOCKS_EXCLUDED(mutex_);
   MapById<NodeId, TrajectoryNodePose> GetTrajectoryNodePoses() const override

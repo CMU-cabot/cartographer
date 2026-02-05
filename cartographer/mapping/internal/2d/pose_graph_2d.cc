@@ -1145,6 +1145,16 @@ transform::Rigid3d PoseGraph2D::GetLocalToGlobalTransform(
                                        trajectory_id);
 }
 
+absl::optional<transform::Rigid3d> PoseGraph2D::TryGetLocalToGlobalTransform(
+    const int trajectory_id) const {
+  if (!mutex_.TryLock()) {
+    return absl::nullopt;
+  }
+  absl::MutexLock locker(&mutex_);
+  return ComputeLocalToGlobalTransform(data_.global_submap_poses_2d,
+                                       trajectory_id);
+}
+
 std::vector<std::vector<int>> PoseGraph2D::GetConnectedTrajectories() const {
   absl::MutexLock locker(&mutex_);
   return data_.trajectory_connectivity_state.Components();
