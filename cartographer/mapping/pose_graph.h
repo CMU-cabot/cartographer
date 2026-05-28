@@ -47,6 +47,8 @@ proto::PoseGraphOptions CreatePoseGraphOptions(
 class PoseGraph : public PoseGraphInterface {
  public:
   struct InitialTrajectoryPose {
+    // A negative trajectory ID means 'relative_pose' is an absolute pose in the
+    // map frame rather than a pose relative to another trajectory.
     int to_trajectory_id;
     transform::Rigid3d relative_pose;
     common::Time time;

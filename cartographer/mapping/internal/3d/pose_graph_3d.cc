@@ -71,10 +71,12 @@ std::vector<SubmapId> PoseGraph3D::InitializeGlobalSubmapPoses(
     // If we don't already have an entry for the first submap, add one.
     if (submap_data.SizeOfTrajectoryOrZero(trajectory_id) == 0) {
       if (data_.initial_trajectory_poses.count(trajectory_id) > 0) {
-        data_.trajectory_connectivity_state.Connect(
-            trajectory_id,
-            data_.initial_trajectory_poses.at(trajectory_id).to_trajectory_id,
-            time);
+        const auto& initial_trajectory_pose =
+            data_.initial_trajectory_poses.at(trajectory_id);
+        if (initial_trajectory_pose.to_trajectory_id >= 0) {
+          data_.trajectory_connectivity_state.Connect(
+              trajectory_id, initial_trajectory_pose.to_trajectory_id, time);
+        }
       }
       optimization_problem_->AddSubmap(
           trajectory_id, ComputeLocalToGlobalTransform(
@@ -1099,6 +1101,9 @@ transform::Rigid3d PoseGraph3D::ComputeLocalToGlobalTransform(
   if (begin_it == end_it) {
     const auto it = data_.initial_trajectory_poses.find(trajectory_id);
     if (it != data_.initial_trajectory_poses.end()) {
+      if (it->second.to_trajectory_id < 0) {
+        return it->second.relative_pose;
+      }
       return GetInterpolatedGlobalTrajectoryPose(it->second.to_trajectory_id,
                                                  it->second.time) *
              it->second.relative_pose;
