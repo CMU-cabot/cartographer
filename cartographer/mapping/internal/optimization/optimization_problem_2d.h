@@ -115,6 +115,9 @@ class OptimizationProblem2D
       const {
     return trajectory_data_;
   }
+  const std::map<int, int>& last_fixed_frame_pose_constraint_counts() const {
+    return last_fixed_frame_pose_constraint_counts_;
+  }
 
  private:
   std::unique_ptr<transform::Rigid3d> InterpolateOdometry(
@@ -125,6 +128,7 @@ class OptimizationProblem2D
       const NodeSpec2D& second_node_data) const;
 
   optimization::proto::OptimizationProblemOptions options_;
+  std::map<int, int> last_fixed_frame_pose_constraint_counts_;
   MapById<NodeId, NodeSpec2D> node_data_;
   MapById<SubmapId, SubmapSpec2D> submap_data_;
   std::map<std::string, transform::Rigid3d> landmark_data_;

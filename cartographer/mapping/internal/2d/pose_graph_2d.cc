@@ -24,6 +24,7 @@
 #include <iostream>
 #include <iterator>
 #include <limits>
+#include <map>
 #include <memory>
 #include <numeric>
 #include <sstream>
@@ -46,6 +47,9 @@ static auto* kWorkQueueDelayMetric = metrics::Gauge::Null();
 static auto* kWorkQueueSizeMetric = metrics::Gauge::Null();
 static auto* kConstraintsSameTrajectoryMetric = metrics::Gauge::Null();
 static auto* kConstraintsDifferentTrajectoryMetric = metrics::Gauge::Null();
+static auto* kFixedFramePoseConstraintsMetricFamily =
+    metrics::Family<metrics::Gauge>::Null();
+static std::map<int, metrics::Gauge*> kFixedFramePoseConstraintsMetrics;
 static auto* kActiveSubmapsMetric = metrics::Gauge::Null();
 static auto* kFrozenSubmapsMetric = metrics::Gauge::Null();
 static auto* kDeletedSubmapsMetric = metrics::Gauge::Null();
@@ -550,6 +554,24 @@ void PoseGraph2D::HandleWorkQueue(
     kConstraintsSameTrajectoryMetric->Set(inter_constraints_same_trajectory);
     kConstraintsDifferentTrajectoryMetric->Set(
         inter_constraints_different_trajectory);
+
+    // Update per-trajectory fixed-frame constraint counts,
+    // reporting 0 to avoid stale counts.
+    const auto& fixed_frame_pose_constraint_counts =
+        optimization_problem_->last_fixed_frame_pose_constraint_counts();
+    for (const int trajectory_id :
+         optimization_problem_->node_data().trajectory_ids()) {
+      auto& metric = kFixedFramePoseConstraintsMetrics[trajectory_id];
+      if (metric == nullptr) {
+        metric = kFixedFramePoseConstraintsMetricFamily->Add(
+            {{"trajectory_id", std::to_string(trajectory_id)}});
+      }
+      const auto count_it =
+          fixed_frame_pose_constraint_counts.find(trajectory_id);
+      metric->Set(count_it == fixed_frame_pose_constraint_counts.end()
+                      ? 0
+                      : count_it->second);
+    }
   }
 
   DrainWorkQueue();
@@ -1404,6 +1426,11 @@ void PoseGraph2D::RegisterMetrics(metrics::FamilyFactory* family_factory) {
       constraints->Add({{"tag", "inter_submap"}, {"trajectory", "different"}});
   kConstraintsSameTrajectoryMetric =
       constraints->Add({{"tag", "inter_submap"}, {"trajectory", "same"}});
+  auto* fixed_frame_pose_constraints = family_factory->NewGaugeFamily(
+      "mapping_2d_pose_graph_fixed_frame_pose_constraints",
+      "Number of fixed-frame pose constraints used in the last optimization");
+  kFixedFramePoseConstraintsMetricFamily = fixed_frame_pose_constraints;
+  kFixedFramePoseConstraintsMetrics.clear();
   auto* submaps = family_factory->NewGaugeFamily(
       "mapping_2d_pose_graph_submaps", "Number of submaps in the pose graph.");
   kActiveSubmapsMetric = submaps->Add({{"state", "active"}});

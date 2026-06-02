@@ -249,6 +249,7 @@ void OptimizationProblem2D::Solve(
     const std::map<int, PoseGraphInterface::TrajectoryState>&
         trajectories_state,
     const std::map<std::string, LandmarkNode>& landmark_nodes) {
+  last_fixed_frame_pose_constraint_counts_.clear();
   if (node_data_.empty()) {
     // Nothing to optimize.
     return;
@@ -462,6 +463,7 @@ void OptimizationProblem2D::Solve(
                     options_.fixed_frame_pose_tolerant_loss_param_b())
               : nullptr,
           C_fixed_frames.at(trajectory_id).data(), C_nodes.at(node_id).data());
+      ++last_fixed_frame_pose_constraint_counts_[trajectory_id];
     }
   }
 
